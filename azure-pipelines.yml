@@ -48,13 +48,6 @@ stages:
       inputs:
         Contents: $(workingDir)/dist
         
-    - task: Npm@1
-      displayName: 'Test Angular'
-      inputs:
-        command: custom
-        customCommand: run test 
-        workingDir: $(workingDir)
-
 - stage: Build
   displayName: Build and push stage
   jobs:  
