@@ -1,0 +1,9 @@
+<div *ngFor="let gender of genders">
+    <h2>{{gender}} - Owner</h2>
+    <h3>Cat's Name in order</h3>
+    <ul>
+        <li *ngFor="let pet of getPetsByOwnerGender(gender, 'cat')">
+            {{pet.name}}
+        </li>
+    </ul>
+</div>

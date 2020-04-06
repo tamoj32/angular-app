@@ -1,0 +1,74 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '5543a625-9745-481c-889a-194c56ab2fd8'
+  imageRepository: 'aglapp'
+  containerRegistry: 'tamojrn.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  workingDir: '$(System.DefaultWorkingDirectory)'
+
+  tag: 'latest'
+  
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Test
+  displayName: Test 'aglapp'
+  jobs:
+  - job: Test
+    displayName: Test
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        command: install
+        workingDir: $(workingDir)
+
+    - task: Npm@1
+      displayName: 'Build Angular'
+      inputs:
+        command: custom
+        customCommand: run build --prod
+        workingDir: $(workingDir)
+
+    - task: DeleteFiles@1
+      displayName: 'Delete Build files'
+      inputs:
+        Contents: $(workingDir)/dist
+        
+    - task: Npm@1
+      displayName: 'Test Angular'
+      inputs:
+        command: custom
+        customCommand: run test -- --watch=false 
+        workingDir: $(workingDir)
+
+- stage: Build
+  displayName: Build and push stage
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
