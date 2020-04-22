@@ -1,0 +1,16 @@
+apiVersion : apps/v1beta1
+kind: Deployment
+metadata:
+  name: "angularkcn"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "angularkcn"
+    spec:
+      containers:
+        - name: "angularkcn"
+          image: "tamojrn.azurecr.io/angularkcn"
+          ports:
+          - containerPort: 80
